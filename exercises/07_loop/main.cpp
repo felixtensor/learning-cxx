@@ -5,9 +5,11 @@
 // READ: 纯函数 <https://zh.wikipedia.org/wiki/%E7%BA%AF%E5%87%BD%E6%95%B0>
 static unsigned long long fibonacci(int i) {
     // TODO: 为缓存设置正确的初始值
-    static unsigned long long cache[96], cached;
+    // static unsigned long long cache[96], cached;
+    static unsigned long long cache[96], cached = 0;
     // TODO: 设置正确的循环条件
-    for (; false; ++cached) {
+    //for (; false; ++cached) {
+    for (; cached <= i; ++cached) {
         cache[cached] = cache[cached - 1] + cache[cached - 2];
     }
     return cache[i];
@@ -26,3 +28,10 @@ int main(int argc, char **argv) {
     ASSERT(fib90 == 2880067194370816120, "fibonacci(90) should be 2880067194370816120");
     return 0;
 }
+
+// ANSWER:
+// The function is not a pure function:
+//   a. It uses a static variable to cache results, which means it has side effects.
+//   b. The output depends on the internal state of the cache, which can change between calls.
+// To make it a pure function, it should not rely on static or global state.
+// A pure function should always return the same output for the same input without side effects.

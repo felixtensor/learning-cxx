@@ -18,9 +18,16 @@ int main(int argc, char **argv) {
 
     // TODO: 观察错误信息，修改一处，使代码编译运行
     // PS: 编译运行，但是不一定能算出结果……
-    constexpr auto ANS_N = 90;
+    // constexpr auto ANS_N = 90;
+    constexpr auto ANS_N = 23;
     constexpr auto ANS = fibonacci(ANS_N);
     std::cout << "fibonacci(" << ANS_N << ") = " << ANS << std::endl;
 
     return 0;
 }
+
+// ANSWER:
+// 1. Compiler needs to fully evaluate the expression at compile time and calculate the result.
+// 2. When using exponentially recursive fibnacci, the expansion depth and number of nodes can explode, causing the compiler to:
+//      a. Exceed its internal recursion / iteration quota(implementation limit).
+//      b. Can not complete the evaluation within the time limit(time limit).
