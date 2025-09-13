@@ -50,9 +50,9 @@ int main(int argc, char **argv) {
     B b = B(3);
 
     // TODO: 补全三个类型的大小
-    static_assert(sizeof(X) == ?, "There is an int in X");
-    static_assert(sizeof(A) == ?, "There is an int in A");
-    static_assert(sizeof(B) == ?, "B is an A with an X");
+    static_assert(sizeof(X) == 4, "There is an int in X");
+    static_assert(sizeof(A) == 4, "There is an int in A");
+    static_assert(sizeof(B) == 8, "B is an A with an X");
 
     i = 0;
     std::cout << std::endl
@@ -75,3 +75,44 @@ int main(int argc, char **argv) {
 
     return 0;
 }
+
+// ANSWER0:
+// 一、打开冰箱门
+// ```bash
+// 1. A(1)
+// 2. X(5)
+// 3. B(1, X(5))
+// ```
+// - 创建完整的派生类对象B(5)
+// - 先调用基类A的构造函数
+// - 再初始化成员变量X
+// - 最后执行B自己的构造函数体
+// 二、把大象放进冰箱
+// ```bash
+// 4. A（A const &） : a(1)
+// ```
+// - 执行对象切片操作
+// - 通过A的拷贝构造函数，将B对象中的基类部分复制到新的A对象中
+// - 这一步只保留了B对象中的"大象鼻子"（基类部分），而丢弃了"大象身体"（派生类特有部分）
+// 三、关闭冰箱门
+// ```bash
+// 5. ~B(1, X(5))
+// 6. ~X(5)
+// 7. ~A(1)
+// ```
+// - 临时B对象被销毁
+// - 先调用B的析构函数
+// - 然后销毁成员变量X
+// - 最后调用基类A的析构函数
+//
+// ANSWER1:
+// 这种代码是不安全的，此处即触发了对象切片操作，因为 B 是 A 的一部分，所以可以把 B 赋值给 A，但是 A 没有
+// B 的成员变量，所以派生类中特有的部分（x）会被“切片”掉。所以会调用 A(A const &) : a(1) 构造函数。总结
+// 下来：
+// 1. 语法合法但不推荐：C++允许派生类对象赋值给基类对象，但这种做法违背面向对象设计原则。
+// 2. 核心问题：会发生"对象切片"，派生类特有的成员变量和行为被丢弃，只保留基类部分。
+// 3. 安全性评估：
+//    - 简单类（无动态资源）基本不会崩溃
+//    - 多态场景下极其危险（虚函数调用失效）
+//    -代码维护性差，易出错
+// 4. 推荐替代：使用指针、引用或智能指针（如 A* ab = new B(5)），可保留多态行为，避免切片问题。
