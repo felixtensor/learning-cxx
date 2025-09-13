@@ -10,6 +10,10 @@ struct Tensor4D {
     Tensor4D(unsigned int const shape_[4], T const *data_) {
         unsigned int size = 1;
         // TODO: 填入正确的 shape 并计算 size
+        for (unsigned int i = 0; i < 4; i++) {
+            shape[i] = shape_[i];
+            size *= shape[i];
+        }
         data = new T[size];
         std::memcpy(data, data_, size * sizeof(T));
     }
@@ -28,6 +32,38 @@ struct Tensor4D {
     // 则 `this` 与 `others` 相加时，3 个形状为 `[1, 2, 1, 4]` 的子张量各自与 `others` 对应项相加。
     Tensor4D &operator+=(Tensor4D const &others) {
         // TODO: 实现单向广播的加法
+        // 验证形状兼容性
+        for (unsigned int i = 0; i < 4; ++i) {
+            if (others.shape[i] != 1 && others.shape[i] != shape[i]) {
+                throw std::invalid_argument("Incompatible shapes for broaccasting");
+            }
+        }
+
+        // 计算步长
+        unsigned int strides[4], others_strides[4];
+        strides[3] = 1;
+        others_strides[3] = 1;
+        for (int i = 2; i >= 0; --i) {
+            strides[i] = strides[i + 1] * shape[i + 1];
+            others_strides[i] = others_strides[i + 1] * others.shape[i + 1];
+        }
+
+        // 遍历所有元素
+        for (unsigned int i = 0; i < shape[0]; ++i) {
+            unsigned int other_i = (others.shape[0] == 1) ? 0 : i;
+            for (unsigned int j = 0; j < shape[1]; ++j) {
+                unsigned int other_j = (others.shape[1] == 1) ? 0 : j;
+                for (unsigned int k = 0; k < shape[2]; ++k) {
+                    unsigned int other_k = (others.shape[2] == 1) ? 0 : k;
+                    for (unsigned int l = 0; l < shape[3]; ++l) {
+                        unsigned int other_l = (others.shape[3] == 1) ? 0 : l;
+                        unsigned int index = i * strides[0] + j * strides[1] + k * strides[2] + l * strides[3];
+                        unsigned int other_index = other_i * others_strides[0] + other_j * others_strides[1] + other_k * others_strides[2] + other_l * others_strides[3];
+                        data[index] += others.data[other_index];
+                    }
+                }
+            }
+        }
         return *this;
     }
 };
