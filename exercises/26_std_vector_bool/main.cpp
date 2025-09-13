@@ -12,8 +12,16 @@ int main(int argc, char **argv) {
     ASSERT(vec.size() == 100, "Make this assertion pass.");
     // NOTICE: 平台相关！注意 CI:Ubuntu 上的值。
     std::cout << "sizeof(std::vector<bool>) = " << sizeof(std::vector<bool>) << std::endl;
-    // ASSERT(sizeof(vec) == 24, "Fill in the correct value."); // on macOS Arm64
-    ASSERT(sizeof(vec) == 40, "Fill in the correct value.");// on linux & windows x64
+#if defined(__APPLE__) && (defined(__arm64__) || defined(__aarch64__))
+    // macOS Arm64 平台
+    ASSERT(sizeof(vec) == 24, "Fill in the correct value.");
+#elif defined(_WIN32) || defined(_WIN64)
+    // Windows 平台
+    ASSERT(sizeof(vec) == 32, "Fill in the correct value.");
+#else
+    // Linux 平台
+    ASSERT(sizeof(vec) == 40, "Fill in the correct value.");
+#endif
     {
         vec[20] = false;
         ASSERT(!vec[20], "Fill in `vec[20]` or `!vec[20]`.");
